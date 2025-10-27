@@ -120,3 +120,31 @@
     @apply bg-background text-foreground;
   }
 }
+/* Paul CSS */
+
+.bg-image {
+  background-image: url('/bg.png');
+  background-size: cover;     
+  background-position: center;  
+  background-repeat: no-repeat; 
+  height: 100vh;               
+  width: 100%;
+}
+
+
+.btncolor{
+  background: #1EB200;
+background: linear-gradient(90deg, rgba(30, 178, 0, 1) 0%, rgba(0, 115, 115, 1) 50%, rgba(55, 0, 167, 1) 100%);
+color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.4s ease; 
+  background-size: 200%; 
+  background-position: left;
+}
+
+.btncolor:hover {
+  background-position: right; 
+}
