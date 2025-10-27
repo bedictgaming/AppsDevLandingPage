@@ -1,77 +1,103 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 
-export default function LoginModal() {
-  const [open, setOpen] = useState(false);
+export default function SignUpPage() {
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    console.log("User registered:", formData);
+    // Here you can send data to your backend using fetch() or axios()
+  };
 
   return (
-    <>
-      {/* Trigger */}
-      <Button
-        className="btncolor w-full sm:w-40 h-10"
-        onClick={() => setOpen(true)}
-      >
-        LOGIN
-      </Button>
+    <div className="min-h-screen flex items-center justify-center bg-image">
+      <div className="bg-white text-gray-800 p-8 rounded-2xl shadow-lg w-full max-w-md">
+        <h1 className="text-3xl font-bold text-center mb-6">Create Account</h1>
 
-      {/* Dialog */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-md bg-white text-gray-900 rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-center text-2xl font-bold">
-              Login to Your Account
-            </DialogTitle>
-            <DialogDescription className="text-center text-gray-500 text-sm">
-              Enter your credentials below to access your account.
-            </DialogDescription>
-          </DialogHeader>
-
-          <form className="flex flex-col gap-4 mt-4">
-            <div>
-              <label className="text-sm font-semibold">Email</label>
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                className="mt-1"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-semibold">Password</label>
-              <Input
-                type="password"
-                placeholder="Enter your password"
-                className="mt-1"
-                required
-              />
-            </div>
-
-            <Button type="submit" className="btncolor w-full">
-              Sign In
-            </Button>
-          </form>
-
-          <div className="text-center mt-4">
-            <p className="text-sm">
-              Don’t have an account?{" "}
-              <a href="/signup" className="text-blue-600 hover:underline">
-                Sign up
-              </a>
-            </p>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div>
+            <label className="text-sm font-semibold">Username</label>
+            <Input
+              type="text"
+              name="username"
+              placeholder="Enter username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+            />
           </div>
-        </DialogContent>
-      </Dialog>
-    </>
+
+          <div>
+            <label className="text-sm font-semibold">Email</label>
+            <Input
+              type="email"
+              name="email"
+              placeholder="Enter email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-semibold">Password</label>
+            <Input
+              type="password"
+              name="password"
+              placeholder="Enter password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-semibold">Confirm Password</label>
+            <Input
+              type="password"
+              name="confirmPassword"
+              placeholder="Confirm password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <Button type="submit" className="btncolor mt-2">
+            Sign Up
+          </Button>
+        </form>
+
+        <p className="text-center text-sm mt-4">
+          Already have an account?{" "}
+          <Link href="/" className="text-blue-600 hover:underline">
+            Login
+          </Link>
+        </p>
+      </div>
+    </div>
   );
 }
