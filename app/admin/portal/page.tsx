@@ -156,7 +156,6 @@ export default function AdminPortalPage() {
   const fetchConversations = useCallback(async (): Promise<Conversation[] | null> => {
     try {
       const adminToken = localStorage.getItem("adminToken");
-
       const response = await axios.get("http://localhost:5000/chat/admin/conversations", {
         headers: {
           Authorization: `Bearer ${adminToken}`,
@@ -222,8 +221,18 @@ export default function AdminPortalPage() {
 
       return null;
     } catch (error: any) {
+      if (error.response?.status === 403) {
+        console.warn("Session expired or forbidden. Redirecting to login.");
+        localStorage.removeItem("adminToken");
+        localStorage.removeItem("adminLoggedIn");
+        localStorage.removeItem("adminStudentId");
+        localStorage.removeItem("adminProfilePicture");
+        localStorage.removeItem("adminConversations");
+        alert("Your session has expired or you do not have access. Please log in again.");
+        window.location.href = "/admin/login";
+        return null;
+      }
       console.error("Error fetching conversations:", error);
-
       try {
         const storedConversations = localStorage.getItem("adminConversations");
         if (storedConversations) {
@@ -237,7 +246,6 @@ export default function AdminPortalPage() {
         console.error("Error loading from localStorage:", e);
         setConversations([]);
       }
-
       return null;
     }
   }, []);
