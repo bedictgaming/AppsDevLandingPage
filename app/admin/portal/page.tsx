@@ -6,7 +6,11 @@ import { LogOut, Upload, X, Eye, MessageSquare, MoreVertical, Trash2 } from "luc
 import axios from "axios";
 import { dispatchAdminLogoutEvent } from "@/lib/useAuthSync";
 import { subscribeToConversation, subscribeToAdminNotifications, triggerMessageEvent } from "@/lib/pusher";
+import UserStatusTable from "./components/UserStatusTable";
+import StatsGrid from "./components/StatsGrid";
+import AnalyticsOverview from "./components/AnalyticsOverview";
 import AdminSidebar from "@/app/components/AdminSidebar";
+
 
 interface FoundItem {
   id?: string;
@@ -39,6 +43,8 @@ interface Conversation {
 }
 
 export default function AdminPortalPage() {
+
+
     const [dropdownOpenId, setDropdownOpenId] = useState<string | null>(null);
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -90,6 +96,8 @@ export default function AdminPortalPage() {
   const [foundMessage, setFoundMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [markingFoundItemId, setMarkingFoundItemId] = useState<string | null>(null);
   const [postedItemMessage, setPostedItemMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+
 
   const activePostedItems = useMemo(
     () => items.filter((item: any) => !item.isFound && item.status !== "claimed"),
@@ -250,7 +258,22 @@ export default function AdminPortalPage() {
     }
   }, []);
 
-
+    useEffect(() => {
+  const fetchActiveUserCount = async () => {
+    try {
+      const adminToken = localStorage.getItem("adminToken");
+      if (!adminToken) return;
+      const data = await getActiveUserCount(adminToken);
+      setStats((prev) => ({
+        ...prev,
+        activeUsers: data.activeUserCount,
+      }));
+    } catch (err) {
+      console.error("Failed to fetch active user count:", err);
+    }
+  };
+  fetchActiveUserCount();
+}, []);
   useEffect(() => {
     const fetchItems = async () => {
       try {
@@ -1270,31 +1293,7 @@ export default function AdminPortalPage() {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-              <div className="bg-gray-800/40 backdrop-blur-md border border-white/10 rounded-xl p-6 hover:border-blue-500/30 transition-all">
-                <p className="text-sm text-gray-400 uppercase tracking-wide">Total Reports</p>
-                <p className="text-3xl font-bold text-white mt-2">{stats.totalReports}</p>
-                <div className="text-2xl mt-2">📋</div>
-              </div>
-
-              <div className="bg-gray-800/40 backdrop-blur-md border border-white/10 rounded-xl p-6 hover:border-red-500/30 transition-all">
-                <p className="text-sm text-gray-400 uppercase tracking-wide">Lost Items</p>
-                <p className="text-3xl font-bold text-white mt-2">{stats.lostItems}</p>
-                <div className="text-2xl mt-2">🔴</div>
-              </div>
-
-              <div className="bg-gray-800/40 backdrop-blur-md border border-white/10 rounded-xl p-6 hover:border-green-500/30 transition-all">
-                <p className="text-sm text-gray-400 uppercase tracking-wide">Found Items Posted</p>
-                <p className="text-3xl font-bold text-white mt-2">{stats.foundItems}</p>
-                <div className="text-2xl mt-2">✅</div>
-              </div>
-
-              <div className="bg-gray-800/40 backdrop-blur-md border border-white/10 rounded-xl p-6 hover:border-purple-500/30 transition-all">
-                <p className="text-sm text-gray-400 uppercase tracking-wide">Active Users</p>
-                <p className="text-3xl font-bold text-white mt-2">{stats.activeUsers}</p>
-                <div className="text-2xl mt-2">👥</div>
-              </div>
-            </div>
+            <StatsGrid stats={stats} />
 
             {/* Post Found Item Button */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -1354,27 +1353,14 @@ export default function AdminPortalPage() {
               </div>
             </div>
 
+
             {/* Analytics Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-gray-800/40 backdrop-blur-md border border-white/10 rounded-xl p-6 hover:border-orange-500/30 transition-all">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-bold text-white">Quick Analytics</h3>
-                  <div className="text-2xl">📊</div>
-                </div>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">System Health</span>
-                    <span className="text-green-400 font-bold">{analytics.systemHealth}%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Items with Photos</span>
-                    <span className="text-cyan-400 font-bold">{analytics.foundWithPhotos + analytics.lostWithPhotos}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Avg Items per User</span>
-                    <span className="text-orange-400 font-bold">{analytics.avgItemsPerUser}</span>
-                  </div>
-                </div>
+            <AnalyticsOverview analytics={analytics} />
+
+            {/* User Online/Offline Overview */}
+            <div className="mb-8">
+              <div className="bg-gray-800/40 backdrop-blur-md border border-white/10 rounded-xl p-6">
+                <UserStatusTable />
               </div>
             </div>
 
@@ -1736,7 +1722,7 @@ export default function AdminPortalPage() {
                           ? "bg-gray-700/50 border-blue-500/50"
                           : "bg-gray-800/50 border-white/10 hover:border-blue-500/30"
                       }`}
-                    >
+                                       >
                       <div className="flex gap-4">
                         {/* Item Image */}
                         <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-blue-900/40 to-cyan-900/40 flex-shrink-0 overflow-hidden border border-white/10">
@@ -2153,4 +2139,11 @@ export default function AdminPortalPage() {
       )}
     </div>
   );
+}
+
+async function getActiveUserCount(token: string) {
+  const response = await axios.get("http://localhost:5000/users/active/count", {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
 }
