@@ -101,7 +101,6 @@ export default function Dashboard() {
       <header className="relative z-20 bg-gray-800/40 backdrop-blur-md border-b border-white/10 sticky top-0">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            
             <div>
               <h1 className="text-xl font-bold text-white"></h1>
               <p className="text-xs text-gray-400"></p>
